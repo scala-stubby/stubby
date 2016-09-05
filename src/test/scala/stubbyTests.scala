@@ -48,6 +48,19 @@ class stubbyTests extends FunSuite {
     }
   }
 
+  test("stubs vars") {
+    @stubby class Test {
+      var test: Int
+    }
+    intercept[NotImplementedError] {
+      (new Test).test
+    }
+    intercept[NotImplementedError] {
+      (new Test).test = 4
+    }
+  }
+
+
   test("stubs vals and defs together") {
     @stubby class Test {
       def test(a: Int, b: Int): String

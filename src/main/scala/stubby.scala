@@ -14,68 +14,49 @@ object stubby {
   def impl(c: Context)(annottees: c.Tree*): c.Tree = {
     import c.universe._
     def stub(enclosing: Type, member: TermSymbol) = {
-      if (member.isGetter) {
-        val name = member.name
-        val tpe = member.infoIn(enclosing)
-        val mods = {
-          val flags = {
-            if (member.isPrivate) Flag.LAZY|Flag.PRIVATE
-            else if (member.isProtected) Flag.LAZY|Flag.PROTECTED
-            else Flag.LAZY
-          }
-          if (member.privateWithin == NoSymbol) {
-            Modifiers(flags)
-          } else {
-            Modifiers(
-              flags,
-              member.privateWithin.name
-            )
-          }
-        }
-        val nameString = name.decodedName.toString
-        val errorMessage = Literal(Constant(s"$nameString is an unimplemented stub"))
-        q"$mods val $name: $tpe = throw new _root_.scala.NotImplementedError($errorMessage)"
-      } else {
-        val name = member.name
-        val tpe = member.infoIn(enclosing)
-        val resultType = tpe.finalResultType
-        val memberType = member.infoIn(enclosing)
-        val params = memberType.paramLists.map { list =>
-          list.map { param =>
-            val name = param.name.toTermName
-            val tpe = param.typeSignatureIn(memberType)
-            val mods = Modifiers(Flag.PARAM)
-            val tree = q"$mods val $name: $tpe = ${EmptyTree}"
-            internal.setSymbol(tree, param)
-            tree
-          }
-        }
-        val typeParams = member.infoIn(enclosing).typeParams.map { param =>
-          val name = param.name.toTypeName
+      val name = member.name
+      val tpe = member.infoIn(enclosing)
+      val resultType = tpe.finalResultType
+      val memberType = member.infoIn(enclosing)
+      val params = memberType.paramLists.map { list =>
+        list.map { param =>
+          val name = param.name.toTermName
+          val tpe = param.typeSignatureIn(memberType)
           val mods = Modifiers(Flag.PARAM)
-          val tree = q"$mods type $name = ${EmptyTree}"
+          val tree = q"$mods val $name: $tpe = ${EmptyTree}"
           internal.setSymbol(tree, param)
           tree
         }
-        val mods = {
-          val flags = {
-            if (member.isPrivate) Flag.PRIVATE
-            else if (member.isProtected) Flag.PROTECTED
-            else NoFlags
-          }
-          if (member.privateWithin == NoSymbol) {
-            Modifiers(flags)
-          } else {
-            Modifiers(
-              flags,
-              member.privateWithin.name
-            )
-          }
-        }
-        val nameString = name.decodedName.toString
-        val errorMessage = Literal(Constant(s"$nameString is an unimplemented stub"))
-        q"$mods def $name[..$typeParams](...${params}): $resultType = throw new _root_.scala.NotImplementedError($errorMessage)"
       }
+      val typeParams = member.infoIn(enclosing).typeParams.map { param =>
+        val name = param.name.toTypeName
+        val mods = Modifiers(Flag.PARAM)
+        val tree = q"$mods type $name = ${EmptyTree}"
+        internal.setSymbol(tree, param)
+        tree
+      }
+      val mods = {
+        val visibility = {
+          if (member.isPrivate) Flag.PRIVATE
+          else if (member.isProtected) Flag.PROTECTED
+          else NoFlags
+        }
+        val stability = {
+          if (member.isStable) Flag.STABLE
+          else NoFlags
+        }
+        if (member.privateWithin == NoSymbol) {
+          Modifiers(visibility|stability)
+        } else {
+          Modifiers(
+            visibility|stability,
+            member.privateWithin.name
+          )
+        }
+      }
+      val nameString = name.decodedName.toString
+      val errorMessage = Literal(Constant(s"$nameString is an unimplemented stub"))
+      q"$mods def $name[..$typeParams](...${params}): $resultType = throw new _root_.scala.NotImplementedError($errorMessage)"
     }
 
     def stubAbstractMembers(t: Tree): List[Tree] = {
