@@ -76,6 +76,17 @@ object stubby {
       case _ => false
     }
 
+    def assertValidTypes(trees: List[Tree]): Unit =
+      trees.foreach { tree =>
+        val tpe = c.typecheck(
+          tree = q"null: $tree", c.TERMmode,
+          silent = true
+        ).tpe
+        if (tpe == NoType) {
+          c.abort(tree.pos, s"Stubby cannot see the signature for ${showCode(tree)}. Perhaps it's defined as a local class/trait.")
+        } else ()
+      }
+
     val (head :: tail) = annottees.toList
     val transformed = head match {
       case q"""
@@ -83,6 +94,7 @@ object stubby {
           ..$members
         }
       """ =>
+        assertValidTypes(parents)
         val (abstractMembers, others) = pullOutAbstracts(members)
         val stubs = {
           stubAbstractMembers(
@@ -102,6 +114,7 @@ object stubby {
           ..$members
         }
       """ =>
+        assertValidTypes(parents)
         val (abstractMembers, others) = pullOutAbstracts(members)
         val stubs = {
           stubAbstractMembers(
@@ -121,6 +134,7 @@ object stubby {
           ..$members
         }
       """ =>
+        assertValidTypes(parents)
         val (abstractMembers, others) = pullOutAbstracts(members)
         val stubs = {
           stubAbstractMembers(
