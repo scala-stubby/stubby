@@ -62,6 +62,7 @@ class AuthenticatorTest extends FunSuite with Matchers {
         case "tester" => Some(User("tester", HashPassword("test")))
         case other => None
       }
+      // Note that write is not implemented
     }
     val authenticator = new Authenticator(TestStore)
     authenticator.authenticate("tester", "test") shouldBe true
