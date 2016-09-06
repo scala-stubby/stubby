@@ -1,10 +1,10 @@
 
 # Stubby: Barebones Stubbing Library
 
-Stubby is an extremely non-intrusive framework for generating stubs (method
-implemetations that throw exceptions when called). The idea is to allow you to
-use the standard syntax to implement the part of an interface that you need for
-some specific test and have Stubby fill in the rest of the interface with stubs.
+Stubby is an extremely non-intrusive library for generating stub implementations
+that throw exceptions at runtime. The idea is to allow you to use the standard
+syntax to implement the part of an interface that you need for some specific
+test and have Stubby fill in the rest of the interface with stubs.
 
 # Minimal Example
 
