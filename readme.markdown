@@ -68,3 +68,32 @@ class AuthenticatorTest extends FunSuite with Matchers {
   }
 }
 ```
+
+# Limitations
+## Designed-In Limitations
+Stubby is a relatively limited tool by design and will always be so. If you need
+a tool that helps you do things like override final methods, record calls, or
+validate expectations, you should use a mocking library like ScalaMock or
+Mockito+PowerMock. For my part, I hate the user experience of these libraries
+and avoid them whenever possible (but I acknowledge that occasionally you do
+need the more-powerful features that they offer).
+## Locally-Defined Parent Types
+Stubby suffers from an unfortunate limitation due to the fact that it's built
+around a macro annotation: due to the way that macro annotations are
+implemented, it isn't possible for Stubby to see the interfaces of base types
+that are defined in the same local scope as an `@stubby`-annotated object/type.
+If you ever annotate an object/type that extends a type from its local scope
+with `@stubby`, you'll get a compile-time error. For example:
+```scala
+scala> import net.clhodapp.stubby
+import net.clhodapp.stubby
+
+scala> def foo = {
+     |   class C
+     |   @stubby class D extends C
+     |   new D
+     | }
+<console>:14: error: Stubby cannot see the signature for C. Perhaps it's defined as a local class/trait.
+         @stubby class D extends C
+                                 ^
+```
