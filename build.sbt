@@ -12,6 +12,7 @@ organizationHomepage := Some(url("https://github.com/scala-stubby"))
 bintrayOrganization := Some("scala-stubby")
 
 scalaVersion := "2.11.8"
+crossScalaVersions := Seq("2.11.8", "2.12.0-M5")
 
 scalacOptions += "-language:_"
 
