@@ -60,7 +60,7 @@ object stubby {
     }
 
     def stubAbstractMembers(t: Tree): List[Tree] = {
-      val tpe = c.typecheck(t, c.TYPEmode).tpe
+      val tpe = c.typecheck(t, c.TERMmode).tpe
       val abstractMembers =
         tpe.members
           .filter(_.isAbstract)
@@ -86,7 +86,7 @@ object stubby {
         val (abstractMembers, others) = pullOutAbstracts(members)
         val stubs = {
           stubAbstractMembers(
-            tq"..$parents { ..$abstractMembers }"
+            q"{class Dummy extends ..$parents { ..$members }; null: Dummy}".duplicate
           )
         }
         List(
@@ -105,7 +105,7 @@ object stubby {
         val (abstractMembers, others) = pullOutAbstracts(members)
         val stubs = {
           stubAbstractMembers(
-            tq"..$parents { ..$abstractMembers }"
+            q"{class Dummy extends ..$parents { ..$members }; null: Dummy}".duplicate
           )
         }
         List(
@@ -124,7 +124,7 @@ object stubby {
         val (abstractMembers, others) = pullOutAbstracts(members)
         val stubs = {
           stubAbstractMembers(
-            tq"..$parents { ..$abstractMembers }"
+            q"{class Dummy extends ..$parents { ..$members }; null: Dummy}".duplicate
           )
         }
         List(

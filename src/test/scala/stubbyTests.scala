@@ -121,4 +121,11 @@ class stubbyTests extends FunSuite {
     assert(tpe.member(TermName("bar")).isProtected)
   }
 
+  test("allows implementing abstract members from the parent") {
+    @stubby class Test extends BaseClass {
+      val test = "3"
+    }
+    (new Test).test(1,2)
+  }
+
 }
