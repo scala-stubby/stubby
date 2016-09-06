@@ -23,6 +23,7 @@ libraryDependencies ++= Seq(
 )
 
 publishMavenStyle := true
+releasePublishArtifactsAction := PgpKeys.publishSigned.value
 scmInfo := Some(
   ScmInfo(
     browseUrl = url("https://github.com/scala_stubby/stubby"),
