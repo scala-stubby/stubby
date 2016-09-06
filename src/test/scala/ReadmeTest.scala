@@ -1,6 +1,6 @@
 
 import org.scalatest.{FunSuite, Matchers}
-import net.clhodapp.stubby
+import org.scala_stubby.stubby
 
 trait Store[T] {
   def read(key: String): Option[T]

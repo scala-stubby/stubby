@@ -1,5 +1,5 @@
 
-package net.clhodapp
+package org.scala_stubby
 
 import scala.reflect.macros.whitebox.Context
 import scala.annotation.StaticAnnotation

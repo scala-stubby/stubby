@@ -1,7 +1,7 @@
 
 import Configurations.{CompilerPlugin, Test}
 
-organization := "net.clhodapp"
+organization := "org.scala_stubby"
 name := "stubby"
 
 scalaVersion := "2.11.8"

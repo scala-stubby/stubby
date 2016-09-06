@@ -12,8 +12,8 @@ Stubby provides a single macro annotation, `@stubby`, which can be added to
 classes, traits, and objects to have Stubby fill in stub implementations for
 their abstract members. Here's a minimal example from the REPL:
 ```scala
-scala> import net.clhodapp.stubby
-import net.clhodapp.stubby
+scala> import org.scala_stubby.stubby
+import org.scala_stubby.stubby
 
 scala> @stubby object Test { val test: Int }
 defined object Test
@@ -30,7 +30,7 @@ Here's an example that more fully shows the intended use-case. It assumes that
 you have a modern version of ScalaTest on the classpath.
 ```scala
 import org.scalatest.{FunSuite, Matchers}
-import net.clhodapp.stubby
+import org.scala_stubby.stubby
 
 trait Store[T] {
   def read(key: String): Option[T]
@@ -86,8 +86,8 @@ that are defined in the same local scope as an `@stubby`-annotated object/type.
 If you ever annotate an object/type that extends a type from its local scope
 with `@stubby`, you'll get a compile-time error. For example:
 ```scala
-scala> import net.clhodapp.stubby
-import net.clhodapp.stubby
+scala> import org.scala_stubby.stubby
+import org.scala_stubby.stubby
 
 scala> def foo = {
      |   class C

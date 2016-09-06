@@ -1,5 +1,5 @@
 
-package net.clhodapp
+package org.scala_stubby
 
 import org.scalatest.FunSuite
 
@@ -10,7 +10,7 @@ abstract class BaseClass {
 }
 
 trait AccessTestBase {
-  private[clhodapp] def foo: String
+  private[scala_stubby] def foo: String
   protected val bar: Int
 }
 
@@ -117,7 +117,7 @@ class stubbyTests extends FunSuite {
   test("retains access modifiers") {
     import reflect.runtime.universe._
     val tpe = typeOf[AccessTest]
-    assert(tpe.member(TermName("foo")).privateWithin.name.toString === "clhodapp")
+    assert(tpe.member(TermName("foo")).privateWithin.name.toString === "scala_stubby")
     assert(tpe.member(TermName("bar")).isProtected)
   }
 
