@@ -10,7 +10,6 @@ name := "stubby"
 description := "Barebones Stubbing Framework for Scala"
 homepage := Some(url("https://github.com/scala-stubby/stubby"))
 licenses := Seq("Apache 2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
-git.useGitDescribe := true
 
 organization := "org.scala_stubby"
 organizationName := "The Stubby Contributors"
@@ -27,15 +26,6 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.0.0" % Test
 )
 
-publishMavenStyle := true
-releasePublishArtifactsAction := PgpKeys.publishSigned.value
-scmInfo := Some(
-  ScmInfo(
-    browseUrl = url("https://github.com/scala_stubby/stubby"),
-    connection = "scm:git:https://github.com/scala_stubby/stubby.git",
-    devConnection = Some("scm:git:https://github.com/scala_stubby/stubby.git")
-  )
-)
 developers := List(
   Developer(
     id = "clhodapp",
@@ -44,3 +34,22 @@ developers := List(
     url = url("https://github.com/clhodapp")
   )
 )
+
+scmInfo := Some(
+  ScmInfo(
+    browseUrl = url("https://github.com/scala_stubby/stubby"),
+    connection = "scm:git:https://github.com/scala_stubby/stubby.git",
+    devConnection = Some("scm:git:https://github.com/scala_stubby/stubby.git")
+  )
+)
+
+git.useGitDescribe := true
+publishMavenStyle := true
+publishTo := {
+  if (isSnapshot.value) {
+    Some("JFrog OSS Snapshots" at "https://oss.jfrog.org/artifactory/oss-snapshot-local")
+  } else {
+    Some("JFrog OSS Releases" at "https://oss.jfrog.org/artifactory/oss-release-local")
+  }
+}
+
