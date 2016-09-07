@@ -13,5 +13,5 @@ deployment:
   publish:
     branch: master
     commands:
-      - echo "credentials += Credentials(\"Artifactory Realm\", \"oss.jfrog.org\", \"$BINTRAY_USER\", \"$BINTRAY_KEY\")" >> ~/.sbt/0.13/credentials.sbt"
+      - echo "credentials += Credentials(\"Artifactory Realm\", \"oss.jfrog.org\", \"$BINTRAY_USER\", \"$BINTRAY_KEY\")" > ~/.sbt/0.13/credentials.sbt
       - sbt +publish
