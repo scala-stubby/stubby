@@ -3,7 +3,7 @@ machine:
     version: openjdk8
 dependencies:
   override:
-    - sbt +compile
+    - sbt +update
   cache_directories:
     - "~/.sbt"
 test:

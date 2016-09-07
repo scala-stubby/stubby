@@ -25,6 +25,7 @@ libraryDependencies ++= Seq(
   "org.scalamacros" % "paradise" % "2.1.0" % CompilerPlugin cross CrossVersion.full,
   "org.scalatest" %% "scalatest" % "3.0.0" % Test
 )
+updateOptions := updateOptions.value.withCachedResolution(true)
 
 developers := List(
   Developer(
