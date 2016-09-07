@@ -1,10 +1,16 @@
 
 import Configurations.{CompilerPlugin, Test}
 
+lazy val stubby =
+  project
+    .in(file("."))
+    .enablePlugins(GitVersioning)
+
 name := "stubby"
 description := "Barebones Stubbing Framework for Scala"
 homepage := Some(url("https://github.com/scala-stubby/stubby"))
-licenses := Seq("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
+licenses := Seq("Apache 2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
+git.useGitDescribe := true
 
 organization := "org.scala_stubby"
 organizationName := "The Stubby Contributors"
@@ -38,11 +44,3 @@ developers := List(
     url = url("https://github.com/clhodapp")
   )
 )
-
-publishTo := {
-  if (isSnapshot.value) {
-    Some("JFrog OSS Snapshots" at "https://oss.jfrog.org/artifactory/oss-snapshot-local")
-  } else {
-    Some("JFrog OSS Releases" at "https://oss.jfrog.org/artifactory/oss-release-local")
-  }
-}
