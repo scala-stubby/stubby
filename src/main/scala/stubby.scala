@@ -27,6 +27,15 @@ object stubby {
   @compileTimeOnly("stubby.impl is internal and shouldn't be invoked")
   def impl(c: Context)(annottees: c.Tree*): c.Tree = {
     import c.universe._
+    import c.internal.decorators._
+    implicit class FlagOps(f: FlagSet) {
+      def -(other: FlagSet): FlagSet = {
+       (f.asInstanceOf[Long] & ~other.asInstanceOf[Long]).asInstanceOf[FlagSet]
+      }
+    }
+    implicit class LongOps(l: Long) {
+      def toFlagSet: FlagSet = l.asInstanceOf[FlagSet]
+    }
     def stub(enclosing: Type, member: TermSymbol) = {
       val name = member.name
       val tpe = member.infoIn(enclosing)
@@ -36,7 +45,7 @@ object stubby {
         list.map { param =>
           val name = param.name.toTermName
           val tpe = param.typeSignatureIn(memberType)
-          val mods = Modifiers(Flag.PARAM)
+          val mods = Modifiers(param.flags)
           val tree = q"$mods val $name: $tpe = ${EmptyTree}"
           internal.setSymbol(tree, param)
           tree
@@ -44,26 +53,20 @@ object stubby {
       }
       val typeParams = member.infoIn(enclosing).typeParams.map { param =>
         val name = param.name.toTypeName
-        val mods = Modifiers(Flag.PARAM)
+        val mods = Modifiers(param.flags)
         val tree = q"$mods type $name = ${EmptyTree}"
         internal.setSymbol(tree, param)
         tree
       }
       val mods = {
-        val visibility = {
-          if (member.isPrivate) Flag.PRIVATE
-          else if (member.isProtected) Flag.PROTECTED
-          else NoFlags
-        }
-        val stability = {
-          if (member.isStable) Flag.STABLE
-          else NoFlags
-        }
+        val DEFERRED = reflect.internal.Flags.DEFERRED.toLong.asInstanceOf[FlagSet]
         if (member.privateWithin == NoSymbol) {
-          Modifiers(visibility|stability)
+          Modifiers(
+            member.flags - DEFERRED
+          )
         } else {
           Modifiers(
-            visibility|stability,
+            member.flags - DEFERRED,
             member.privateWithin.name
           )
         }
@@ -74,7 +77,7 @@ object stubby {
     }
 
     def stubAbstractMembers(t: Tree): List[Tree] = {
-      val tpe = c.typecheck(t, c.TERMmode).tpe
+      val tpe = c.typecheck(t, c.TERMmode, silent = true).tpe
       val abstractMembers =
         tpe.members
           .filter(_.isAbstract)
@@ -90,16 +93,32 @@ object stubby {
       case _ => false
     }
 
-    def assertValidTypes(trees: List[Tree]): Unit =
-      trees.foreach { tree =>
-        val tpe = c.typecheck(
-          tree = q"null: $tree", c.TERMmode,
-          silent = true
-        ).tpe
-        if (tpe == NoType) {
-          c.abort(tree.pos, s"Stubby cannot see the signature for ${showCode(tree)}. Perhaps it's defined as a local class/trait.")
-        } else ()
+    def getValidTypes(trees: List[Tree]): (List[Tree], List[Tree]) =
+      trees.partition {
+        case q"$typeTree(...$args)" =>
+          c.typecheck(
+            tree = q"null: ${typeTree.duplicate}", c.TERMmode,
+            silent = true
+          ).tpe != NoType
+        case typeTree =>
+          c.typecheck(
+            tree = q"null: ${typeTree.duplicate}", c.TERMmode,
+            silent = true
+          ).tpe != NoType
       }
+
+    def warnInvalidParent(parentTree: Tree): Unit = parentTree match {
+      case q"$typeTree(...$args)" =>
+        c.warning(
+          typeTree.pos,
+          s"Stubby cannot see ${showCode(typeTree)}. Perhaps it's defined as a local class/trait."
+        )
+      case typeTree =>
+        c.warning(
+          typeTree.pos,
+          s"Stubby cannot see ${showCode(typeTree)}. Perhaps it's defined as a local class/trait."
+        )
+    }
 
     val (head :: tail) = annottees.toList
     val transformed = head match {
@@ -108,64 +127,61 @@ object stubby {
           ..$members
         }
       """ =>
-        assertValidTypes(parents)
+        val (validParents, invalidParents) = getValidTypes(parents)
+        invalidParents.foreach(warnInvalidParent)
         val (abstractMembers, others) = pullOutAbstracts(members)
         val stubs = {
           stubAbstractMembers(
-            q"{class Dummy extends ..$parents { ..$members }; null: Dummy}".duplicate
+            q"{class Dummy extends ..$validParents { ..$members }; null: Dummy}".duplicate
           )
         }
-        List(
-          q"""
-            $mods class $name extends ..$parents {
-              ..$stubs
-              ..$others
-            }
-        """
-        )
+        q"""
+          $mods class $name extends ..$parents {
+            ..$stubs
+            ..$others
+          }
+      """
       case q"""
         $mods trait $name extends ..$parents {
           ..$members
         }
       """ =>
-        assertValidTypes(parents)
+        val (validParents, invalidParents) = getValidTypes(parents)
+        invalidParents.foreach(warnInvalidParent)
         val (abstractMembers, others) = pullOutAbstracts(members)
         val stubs = {
           stubAbstractMembers(
-            q"{class Dummy extends ..$parents { ..$members }; null: Dummy}".duplicate
+            q"{class Dummy extends ..$validParents { ..$members }; null: Dummy}".duplicate
           )
         }
-        List(
-          q"""
-            $mods trait $name extends ..$parents {
-              ..$stubs
-              ..$others
-            }
-        """
-        )
+        q"""
+          $mods trait $name extends ..$parents {
+            ..$stubs
+            ..$others
+          }
+      """
       case q"""
         $mods object $name extends ..$parents {
           ..$members
         }
       """ =>
-        assertValidTypes(parents)
+        val (validParents, invalidParents) = getValidTypes(parents)
+        invalidParents.foreach(warnInvalidParent)
         val (abstractMembers, others) = pullOutAbstracts(members)
         val stubs = {
           stubAbstractMembers(
-            q"{class Dummy extends ..$parents { ..$members }; null: Dummy}".duplicate
+            q"{class Dummy extends ..$validParents { ..$members }; null: Dummy}".duplicate
           )
         }
-        List(
-          q"""
-            $mods object $name extends ..$parents {
-              ..$stubs
-              ..$others
-            }
+        q"""
+          $mods object $name extends ..$parents {
+            ..$stubs
+            ..$others
+          }
         """
-        )
     }
     q"""
-      ..$transformed
+      $transformed
       ..$tail
     """
   }
