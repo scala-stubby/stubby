@@ -86,15 +86,15 @@ that are defined in the same local scope as an `@stubby`-annotated object/type.
 If you ever annotate an object/type that extends a type from its local scope
 with `@stubby`, you'll get a compile-time error. For example:
 ```scala
-scala> import org.scala_stubby.stubby
-import org.scala_stubby.stubby
+scala> import org.scala_stubby._
+import org.scala_stubby._
 
 scala> def foo = {
      |   class C
      |   @stubby class D extends C
      |   new D
      | }
-<console>:14: error: Stubby cannot see the signature for C. Perhaps it's defined as a local class/trait.
+<console>:16: warning: Stubby cannot see C. Perhaps it's defined as a local class/trait.
          @stubby class D extends C
                                  ^
 ```
