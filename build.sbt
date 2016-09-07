@@ -4,12 +4,11 @@ import Configurations.{CompilerPlugin, Test}
 name := "stubby"
 description := "Barebones Stubbing Framework for Scala"
 homepage := Some(url("https://github.com/scala-stubby/stubby"))
-licenses := Seq("Apache 2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
+licenses := Seq("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
 
 organization := "org.scala_stubby"
 organizationName := "The Stubby Contributors"
 organizationHomepage := Some(url("https://github.com/scala-stubby"))
-bintrayOrganization := Some("scala-stubby")
 
 scalaVersion := "2.11.8"
 crossScalaVersions := Seq("2.11.8", "2.12.0-M5")
@@ -39,3 +38,11 @@ developers := List(
     url = url("https://github.com/clhodapp")
   )
 )
+
+publishTo := {
+  if (isSnapshot.value) {
+    Some("JFrog OSS Snapshots" at "https://oss.jfrog.org/artifactory/oss-snapshot-local")
+  } else {
+    Some("JFrog OSS Releases" at "https://oss.jfrog.org/artifactory/oss-release-local")
+  }
+}
