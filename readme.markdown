@@ -84,7 +84,7 @@ around a macro annotation: due to the way that macro annotations are
 implemented, it isn't possible for Stubby to see the interfaces of base types
 that are defined in the same local scope as an `@stubby`-annotated object/type.
 If you ever annotate an object/type that extends a type from its local scope
-with `@stubby`, you'll get a compile-time error. For example:
+with `@stubby`, you'll get a compile-time warning. For example:
 ```scala
 scala> import org.scala_stubby._
 import org.scala_stubby._
